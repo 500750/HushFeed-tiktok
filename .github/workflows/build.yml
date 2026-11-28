@@ -1,14 +1,14 @@
 name: Build HushFeed Patch
 
 on:
-  workflow_dispatch: # 仅允许在 Actions 页面手动点击按钮触发
+  workflow_dispatch: # 仅允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read # 允许读取 GitHub Packages 里的私有依赖
+      packages: read # 允许云端读取私有包
 
     steps:
       - name: Checkout repository
@@ -26,12 +26,12 @@ jobs:
       - name: Build with Gradle
         env:
           GH_USER: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }} # 请确保你已经在仓库 Secrets 里配置了名为 GH_TOKEN 的变量
-        run: ./gradlew :patches:buildAndroid -x test
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        # 这里用的是你提供的完整命令，已经包含了跳过测试和关掉校验
+        run: ./gradlew :patches:buildAndroid -x test --no-build-cache -Dorg.gradle.dependency.verification=off
 
       - name: Upload MPP artifact
         uses: actions/upload-artifact@v4
         with:
           name: HushFeed-Patches
-          # 只抓取 release 目录下的 .mpp 文件
           path: patches/build/release/*.mpp
