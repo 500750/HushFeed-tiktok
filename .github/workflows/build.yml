@@ -1,0 +1,37 @@
+name: Build HushFeed Patch
+
+on:
+  workflow_dispatch: # 仅允许在 Actions 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read # 允许读取 GitHub Packages 里的私有依赖
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        env:
+          GH_USER: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # 请确保你已经在仓库 Secrets 里配置了名为 GH_TOKEN 的变量
+        run: ./gradlew :patches:buildAndroid -x test
+
+      - name: Upload MPP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HushFeed-Patches
+          # 只抓取 release 目录下的 .mpp 文件
+          path: patches/build/release/*.mpp
