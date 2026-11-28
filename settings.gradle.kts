@@ -16,8 +16,8 @@ pluginManagement {
     name = "GitHubPackages"
     url = uri("https://maven.pkg.github.com/MorpheApp/registry")
     credentials {
-        username = System.getenv("GH_USER") ?: ""
-        password = System.getenv("GH_TOKEN") ?: ""
+        username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))
+        password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
     }
 }
         // baksmali and smali come from a source build, resolved as com.github.MorpheApp.smali
