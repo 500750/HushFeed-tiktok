@@ -13,13 +13,13 @@ pluginManagement {
         gradlePluginPortal()
         google()
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/MorpheApp/registry")
-            credentials {
-                username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))
-                password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
-            }
-        }
+    name = "GitHubPackages"
+    url = uri("https://maven.pkg.github.com/MorpheApp/registry")
+    credentials {
+        username = System.getenv("GH_USER") ?: ""
+        password = System.getenv("GH_TOKEN") ?: ""
+    }
+}
         // baksmali and smali come from a source build, resolved as com.github.MorpheApp.smali
         // rather than from Maven Central. The comment used to name iBotPeaches/smali, which the
         // build stopped using when the patches plugin switched forks at 1.3.2.
