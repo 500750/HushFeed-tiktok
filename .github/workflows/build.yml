@@ -1,14 +1,14 @@
 name: Build HushFeed Patch
 
 on:
-  workflow_dispatch: # 仅允许手动触发
+  workflow_dispatch: # 仅允许在 Actions 页面手动点击触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read # 允许云端读取私有包
+      packages: read # 允许读取 GitHub Packages
 
     steps:
       - name: Checkout repository
@@ -25,10 +25,15 @@ jobs:
 
       - name: Build with Gradle
         env:
-          GH_USER: ${{ github.actor }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        # 这里用的是你提供的完整命令，已经包含了跳过测试和关掉校验
-        run: ./gradlew :patches:buildAndroid -x test --no-build-cache -Dorg.gradle.dependency.verification=off
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          # 强行把凭证写入 gradle.properties，解决 401 报错
+          echo "gpr.user=${{ github.actor }}" >> gradle.properties
+          echo "gpr.key=${{ secrets.GH_TOKEN }}" >> gradle.properties
+          
+          # 执行编译（跳过测试、禁用缓存、关闭依赖校验）
+          ./gradlew :patches:buildAndroid -x test --no-build-cache -Dorg.gradle.dependency.verification=off
 
       - name: Upload MPP artifact
         uses: actions/upload-artifact@v4
